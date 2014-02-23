@@ -8,9 +8,13 @@ import android.R.integer;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageInfo;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -31,12 +35,17 @@ public class SampleSurfaceView extends SurfaceView implements
 	private Balls m_balls;
 	public SoundPool m_soundPool;
 	public int[] m_soundIds = new int[11];
+	
+	private Bitmap m_bgImage;
 
 
 	public SampleSurfaceView(Context context) {
 		super(context);
 		SurfaceHolder holder = getHolder();
 		holder.addCallback(this);
+		// 画像
+	    Resources res = this.getContext().getResources();
+	    m_bgImage = BitmapFactory.decodeResource(res, R.drawable.bg1);
 	}
 	
 	public void onResume(Activity activity){
@@ -101,7 +110,12 @@ public class SampleSurfaceView extends SurfaceView implements
 			// 描画処理
 			Canvas canvas = m_holder.lockCanvas();
 			if(canvas != null){
+				// 背景
 				canvas.drawColor(0, PorterDuff.Mode.CLEAR);
+				Rect src = new Rect(0, 0, 600, 900);
+				Rect dst = new Rect(0, 0, 1200, 1800);
+				canvas.drawBitmap(m_bgImage, src, dst, null);
+				// ボール
 				m_balls.draw(canvas);
 				m_holder.unlockCanvasAndPost(canvas);
 			}
@@ -123,6 +137,7 @@ public class SampleSurfaceView extends SurfaceView implements
 class Balls {
 	private SampleSurfaceView m_owner;
 	private ArrayList<Ball> m_balls = new ArrayList<Ball>();
+	private int m_maxCount = 20;
 
 	public Balls(SampleSurfaceView owner) {
 		m_owner = owner;
@@ -135,8 +150,10 @@ class Balls {
 
 	public void addBall(double x, double y){
 		Ball ball = new Ball(m_owner, x, y);
-		m_balls.remove(0); // 0番目を消す
 		m_balls.add(ball);
+		if(m_balls.size() > m_maxCount){
+			m_balls.remove(0); // 0番目を消す
+		}
 	}
 	
 	public void frame() {
@@ -170,6 +187,8 @@ class Ball {
 		double rad = r.nextInt(360) / 360.0f * Math.PI * 2;
 		m_mx = speed * Math.cos(rad);
 		m_my = speed * Math.sin(rad);
+		// 色相
+		m_color = m_rand.nextInt(360);
 	}
 
 	public void frame(SampleSurfaceView owner) {
@@ -194,7 +213,10 @@ class Ball {
 
 	public void draw(Canvas canvas) {
 		Paint paint = new Paint();
-		paint.setColor(Color.WHITE);
+		//paint.setColor(Color.WHITE);
+		// 色相、明度、彩度
+		paint.setColor(Color.HSVToColor(200, new float[]{m_color, 1.0f, 0.5f}));
+		//paint.setAlpha(100);
 		canvas.drawCircle((float) m_x, (float) m_y, 50, paint);
 	}
 
@@ -203,4 +225,5 @@ class Ball {
 	private double m_y = 0;
 	private double m_mx = 10;
 	private double m_my = 10;
+	private float m_color = 0; // 色相
 }
