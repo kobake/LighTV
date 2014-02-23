@@ -5,13 +5,13 @@ import android.app.Activity;
 import android.view.Menu;
 
 public class MainActivity extends Activity {
-
+	SampleSurfaceView m_view;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		//setContentView(R.layout.activity_main);
-		SampleSurfaceView v = new SampleSurfaceView(this);
-		setContentView(v);
+		m_view = new SampleSurfaceView(this);
+		setContentView(m_view);
 	}
 
 	@Override
@@ -20,5 +20,21 @@ public class MainActivity extends Activity {
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
 	}
+
+	@Override
+	protected void onResume() {
+		m_view.onResume(this);
+		// TODO Auto-generated method stub
+		super.onResume();
+	}
+
+	@Override
+	protected void onPause() {
+		m_view.onPause(this);
+		// TODO Auto-generated method stub
+		super.onPause();
+	}
+	
+	
 
 }

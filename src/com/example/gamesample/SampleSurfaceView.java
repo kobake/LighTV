@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Random;
 
 import android.R.integer;
+import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.graphics.Canvas;
@@ -15,6 +16,8 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.graphics.PorterDuff;
+import android.media.AudioManager;
+import android.media.SoundPool;
 
 public class SampleSurfaceView extends SurfaceView implements
 		SurfaceHolder.Callback, Runnable {
@@ -26,12 +29,31 @@ public class SampleSurfaceView extends SurfaceView implements
 	public int m_height = 0;
 	private long t1, t2;
 	private Balls m_balls;
+	public SoundPool m_soundPool;
+	public int[] m_soundIds = new int[11];
 
 
 	public SampleSurfaceView(Context context) {
 		super(context);
 		SurfaceHolder holder = getHolder();
 		holder.addCallback(this);
+	}
+	
+	public void onResume(Activity activity){
+		m_soundPool = new SoundPool(4, AudioManager.STREAM_MUSIC, 0);
+		m_soundIds[0] = m_soundPool.load(activity, R.raw.b10, 0);
+		m_soundIds[1] = m_soundPool.load(activity, R.raw.b1, 0);
+		m_soundIds[2] = m_soundPool.load(activity, R.raw.b2, 0);
+		m_soundIds[3] = m_soundPool.load(activity, R.raw.b3, 0);
+		m_soundIds[4] = m_soundPool.load(activity, R.raw.b4, 0);
+		m_soundIds[5] = m_soundPool.load(activity, R.raw.b5, 0);
+		m_soundIds[6] = m_soundPool.load(activity, R.raw.b6, 0);
+		m_soundIds[7] = m_soundPool.load(activity, R.raw.b7, 0);
+		m_soundIds[8] = m_soundPool.load(activity, R.raw.b8, 0);
+		m_soundIds[9] = m_soundPool.load(activity, R.raw.b9, 0);
+	}
+	public void onPause(Activity activity){
+		m_soundPool.release();
 	}
 
 	@Override
@@ -78,9 +100,11 @@ public class SampleSurfaceView extends SurfaceView implements
 
 			// 描画処理
 			Canvas canvas = m_holder.lockCanvas();
-			canvas.drawColor(0, PorterDuff.Mode.CLEAR);
-			m_balls.draw(canvas);
-			m_holder.unlockCanvasAndPost(canvas);
+			if(canvas != null){
+				canvas.drawColor(0, PorterDuff.Mode.CLEAR);
+				m_balls.draw(canvas);
+				m_holder.unlockCanvasAndPost(canvas);
+			}
 
 			// スリープ
 			t2 = System.currentTimeMillis();
@@ -149,12 +173,23 @@ class Ball {
 	}
 
 	public void frame(SampleSurfaceView owner) {
-		if (m_x < 0 || m_x > owner.m_width)
+		boolean bound = false;
+		if (m_x < 0 || m_x > owner.m_width){
 			m_mx *= -1;
-		if (m_y < 0 || m_y > owner.m_height)
+			bound = true;
+		}
+		if (m_y < 0 || m_y > owner.m_height){
 			m_my *= -1;
+			bound = true;
+		}
 		m_x += m_mx;
 		m_y += m_my;
+		if(bound){
+			int r = m_rand.nextInt(10);
+			r = 9;
+			float rate = 0.2f + m_rand.nextFloat() * 0.8f;
+			owner.m_soundPool.play(owner.m_soundIds[r], 1.0f, 1.0f, 0, 0, rate);
+		}
 	}
 
 	public void draw(Canvas canvas) {
@@ -163,6 +198,7 @@ class Ball {
 		canvas.drawCircle((float) m_x, (float) m_y, 50, paint);
 	}
 
+	private Random m_rand = new Random();
 	private double m_x = 0;
 	private double m_y = 0;
 	private double m_mx = 10;
