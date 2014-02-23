@@ -22,11 +22,15 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.graphics.PorterDuff;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.media.AudioManager;
 import android.media.SoundPool;
 
 public class SampleSurfaceView implements
-		SurfaceHolder.Callback, Runnable, OnTouchListener {
+		SurfaceHolder.Callback, Runnable, OnTouchListener, SensorEventListener {
 
 	private SurfaceHolder m_holder = null;
 	private Thread m_thread = null;
@@ -41,6 +45,7 @@ public class SampleSurfaceView implements
 	private Bitmap m_bgImage;
 	private float[] m_values = new float[4];
 
+	private SensorManager m_sensorManager;
 
 	
 	public SampleSurfaceView(SurfaceView view) {
@@ -51,6 +56,8 @@ public class SampleSurfaceView implements
 	    m_bgImage = BitmapFactory.decodeResource(res, R.drawable.bg1);
 	    // イベント
 	    view.setOnTouchListener(this);
+		// 加速度
+		m_sensorManager = (SensorManager)view.getContext().getSystemService(Context.SENSOR_SERVICE);
 	}
 	
 	public void onSeekChanged(float[] values){
@@ -72,9 +79,17 @@ public class SampleSurfaceView implements
 		m_soundIds[7] = m_soundPool.load(activity, R.raw.b7, 0);
 		m_soundIds[8] = m_soundPool.load(activity, R.raw.b8, 0);
 		m_soundIds[9] = m_soundPool.load(activity, R.raw.b9, 0);
+		// Listenerの登録
+		List<Sensor> sensors = m_sensorManager.getSensorList(Sensor.TYPE_ACCELEROMETER);
+		if(sensors.size() > 0){
+			Sensor s = sensors.get(0);
+			m_sensorManager.registerListener(this, s, SensorManager.SENSOR_DELAY_UI);
+		}
 	}
 	public void onPause(Activity activity){
 		m_soundPool.release();
+		// Listenerの登録解除
+		m_sensorManager.unregisterListener(this);
 	}
 
 	@Override
@@ -144,19 +159,43 @@ public class SampleSurfaceView implements
 		}
 	}
 
+	// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
+	// 加速度
+	// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
+	@Override
+	public void onSensorChanged(SensorEvent event) {
+		if(event.sensor.getType() == Sensor.TYPE_ACCELEROMETER){
+			float[] accs = {
+				event.values[SensorManager.DATA_X], // -10～10 (m/s2)
+				event.values[SensorManager.DATA_Y], // -10～10 (m/s2)
+				event.values[SensorManager.DATA_Z] // -10～10 (m/s2)
+			};
+			if(m_balls != null){
+				m_balls.onSensorChanged(accs);
+			}
+		}
+	}
+
+	// 精度が変わったとき
+	@Override
+	public void onAccuracyChanged(Sensor sensor, int accuracy) {
+	}
+
 }
 
 class Balls {
 	private SampleSurfaceView m_owner;
 	private ArrayList<Ball> m_balls = new ArrayList<Ball>();
-	private int m_maxCount = 20;
+	private int m_maxCount = 10;
 	private float[] m_values = new float[4];
+	private Random m_rand = new Random();
+	private float[] m_accs = new float[4];
 
 	public Balls(SampleSurfaceView owner, float[] values) {
 		m_owner = owner;
 		m_values = values;
 		// 10個くらい作る
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 6; i++) {
 			Ball ball = new Ball(owner);
 			ball.onSeekChanged(values);
 			ball.setRandomColor();
@@ -164,6 +203,9 @@ class Balls {
 		}
 	}
 	
+	public void onSensorChanged(float[] accs){
+		m_accs = accs.clone();
+	}
 	public void onSeekChanged(float[] values){
 		for(int i = 0; i < m_balls.size(); i++){
 			m_balls.get(i).onSeekChanged(values);
@@ -182,13 +224,33 @@ class Balls {
 	
 	public void frame() {
 		for (int i = 0; i < m_balls.size(); i++) {
-			m_balls.get(i).frame(m_owner);
+			m_balls.get(i).frame(m_owner, m_accs);
 		}
 	}
 
 	public void draw(Canvas canvas) {
+		// ボール自体の描画
 		for (int i = 0; i < m_balls.size(); i++) {
 			m_balls.get(i).draw(canvas);
+		}
+		// 線の描画
+		Paint paint = new Paint();
+		int a = 200;
+		float h = m_rand.nextInt(360);
+		float s = 0.5f;
+		float v = 0.98f;
+		paint.setColor(Color.HSVToColor(a, new float[]{h, s, v}));
+		for(int i = 0; i < m_balls.size() - 1; i++){
+			/*canvas.drawLine(
+					(int)m_balls.get(i).m_x, (int)m_balls.get(i).m_y,
+					(int)m_balls.get(i + 1).m_x, (int)m_balls.get(i + 1).m_y,
+					paint);*/
+			for(int j = i + 1; j < m_balls.size(); j++){
+				canvas.drawLine(
+						(int)m_balls.get(i).m_x, (int)m_balls.get(i).m_y,
+						(int)m_balls.get(j).m_x, (int)m_balls.get(j).m_y,
+						paint);
+			}
 		}
 	}
 }
@@ -212,6 +274,7 @@ class Ball {
 		double rad = r.nextInt(360) / 360.0f * Math.PI * 2;
 		m_mx = speed * Math.cos(rad);
 		m_my = speed * Math.sin(rad);
+		m_r = 25 + m_rand.nextInt(50);
 		
 		// デフォルト色設定
 		m_values[0] = 200; //a
@@ -241,18 +304,36 @@ class Ball {
 		m_color = Color.HSVToColor((int)m_values[0], new float[]{m_values[1], m_values[2], m_values[3]});
 	}
 
-	public void frame(SampleSurfaceView owner) {
+	public void frame(SampleSurfaceView owner, float[] accs) {
 		boolean bound = false;
-		if (m_x < 0 || m_x > owner.m_width){
-			m_mx *= -1;
-			bound = true;
-		}
-		if (m_y < 0 || m_y > owner.m_height){
-			m_my *= -1;
-			bound = true;
-		}
+		// 加速度
+		m_my += -accs[0] * 0.1 * 2; // -1 - +1
+		m_mx += -accs[1] * 0.1 * 2; // -2 - +2
+		// 移動
 		m_x += m_mx;
 		m_y += m_my;
+		// 跳ね返り処理
+		if (m_x < 0){
+			m_x = 0;
+			m_mx = Math.abs(m_mx) * 0.9f;
+			bound = true;
+		}
+		else if(m_x > owner.m_width){
+			m_x = owner.m_width;
+			m_mx = -Math.abs(m_mx) * 0.9f;
+			bound = true;
+		}
+		if (m_y < 0){
+			m_y = 0;
+			m_my = Math.abs(m_my) * 0.9f;
+			bound = true;
+		}
+		else if(m_y > owner.m_height){
+			m_y = owner.m_height;
+			m_my = -Math.abs(m_my) * 0.9f;
+			bound = true;
+		}
+		// 跳ね返り音
 		if(bound){
 			int r = m_rand.nextInt(10);
 			r = 4;
@@ -267,13 +348,14 @@ class Ball {
 		// 色相、明度、彩度
 		paint.setColor(m_color);
 		//paint.setAlpha(100);
-		canvas.drawCircle((float) m_x, (float) m_y, 50, paint);
+		canvas.drawCircle((float) m_x, (float) m_y, (float)m_r, paint);
 	}
 
 	private float[] m_values = new float[4];
 	private Random m_rand = new Random();
-	private double m_x = 0;
-	private double m_y = 0;
+	public double m_x = 0;
+	public double m_y = 0;
+	public double m_r = 50; // 半径
 	private double m_mx = 10;
 	private double m_my = 10;
 	private int m_color = 0; // Color

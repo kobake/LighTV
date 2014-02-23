@@ -1,5 +1,6 @@
 package com.example.gamesample;
 
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.R.integer;
 import android.app.Activity;
@@ -14,7 +15,7 @@ public class MainActivity extends Activity implements SeekBar.OnSeekBarChangeLis
 	SeekBar[] m_seeks = new SeekBar[4];
 	TextView[] m_texts = new TextView[4];
 	float[] m_values = new float[4];
-	
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
