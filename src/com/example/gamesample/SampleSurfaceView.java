@@ -19,12 +19,14 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
+import android.view.View.OnTouchListener;
 import android.graphics.PorterDuff;
 import android.media.AudioManager;
 import android.media.SoundPool;
 
-public class SampleSurfaceView extends SurfaceView implements
-		SurfaceHolder.Callback, Runnable {
+public class SampleSurfaceView implements
+		SurfaceHolder.Callback, Runnable, OnTouchListener {
 
 	private SurfaceHolder m_holder = null;
 	private Thread m_thread = null;
@@ -37,19 +39,29 @@ public class SampleSurfaceView extends SurfaceView implements
 	public int[] m_soundIds = new int[11];
 	
 	private Bitmap m_bgImage;
+	private float[] m_values = new float[4];
 
 
-	public SampleSurfaceView(Context context) {
-		super(context);
-		SurfaceHolder holder = getHolder();
+	
+	public SampleSurfaceView(SurfaceView view) {
+		SurfaceHolder holder = view.getHolder();
 		holder.addCallback(this);
 		// 画像
-	    Resources res = this.getContext().getResources();
+	    Resources res = view.getContext().getResources();
 	    m_bgImage = BitmapFactory.decodeResource(res, R.drawable.bg1);
+	    // イベント
+	    view.setOnTouchListener(this);
+	}
+	
+	public void onSeekChanged(float[] values){
+		m_values = values;
+		if(m_balls != null){
+			m_balls.onSeekChanged(values);
+		}
 	}
 	
 	public void onResume(Activity activity){
-		m_soundPool = new SoundPool(4, AudioManager.STREAM_MUSIC, 0);
+		m_soundPool = new SoundPool(8, AudioManager.STREAM_MUSIC, 0);
 		m_soundIds[0] = m_soundPool.load(activity, R.raw.b10, 0);
 		m_soundIds[1] = m_soundPool.load(activity, R.raw.b1, 0);
 		m_soundIds[2] = m_soundPool.load(activity, R.raw.b2, 0);
@@ -66,7 +78,7 @@ public class SampleSurfaceView extends SurfaceView implements
 	}
 
 	@Override
-	public boolean onTouchEvent(MotionEvent event) {
+	public boolean onTouch(View v, MotionEvent event) {
 		switch (event.getAction()) {
 		case MotionEvent.ACTION_DOWN:
 			m_balls.addBall(event.getX(), event.getY());
@@ -99,7 +111,7 @@ public class SampleSurfaceView extends SurfaceView implements
 
 	@Override
 	public void run() {
-		m_balls = new Balls(this);
+		m_balls = new Balls(this, m_values);
 		// TODO Auto-generated method stub
 		while (m_isAttached) {
 			t1 = System.currentTimeMillis();
@@ -138,18 +150,30 @@ class Balls {
 	private SampleSurfaceView m_owner;
 	private ArrayList<Ball> m_balls = new ArrayList<Ball>();
 	private int m_maxCount = 20;
+	private float[] m_values = new float[4];
 
-	public Balls(SampleSurfaceView owner) {
+	public Balls(SampleSurfaceView owner, float[] values) {
 		m_owner = owner;
+		m_values = values;
 		// 10個くらい作る
 		for (int i = 0; i < 10; i++) {
 			Ball ball = new Ball(owner);
+			ball.onSeekChanged(values);
+			ball.setRandomColor();
 			m_balls.add(ball);
+		}
+	}
+	
+	public void onSeekChanged(float[] values){
+		for(int i = 0; i < m_balls.size(); i++){
+			m_balls.get(i).onSeekChanged(values);
 		}
 	}
 
 	public void addBall(double x, double y){
 		Ball ball = new Ball(m_owner, x, y);
+		ball.onSeekChanged(m_values);
+		ball.setRandomColor();
 		m_balls.add(ball);
 		if(m_balls.size() > m_maxCount){
 			m_balls.remove(0); // 0番目を消す
@@ -170,6 +194,7 @@ class Balls {
 }
 
 class Ball {
+	
 	public Ball(SampleSurfaceView owner) {
 		this(owner, -1, -1);
 	}
@@ -187,8 +212,33 @@ class Ball {
 		double rad = r.nextInt(360) / 360.0f * Math.PI * 2;
 		m_mx = speed * Math.cos(rad);
 		m_my = speed * Math.sin(rad);
+		
+		// デフォルト色設定
+		m_values[0] = 200; //a
+		m_values[1] = 359; //h 色相
+		m_values[2] = 1; //s 彩度
+		m_values[3] = 1; //v 明度
+		
 		// 色相
-		m_color = m_rand.nextInt(360);
+		setRandomColor();
+	}
+	public void onSeekChanged(float[] values){
+		float h = m_values[1];
+		m_values = values.clone();
+		m_values[1] = h;
+		m_color = Color.HSVToColor((int)m_values[0], new float[]{m_values[1], m_values[2], m_values[3]});
+	}
+	public void setRandomColor(){
+		// アルファ (0-255)
+		//m_values[0] = 200;
+		// 色相 (0 - 359)
+		m_values[1] = m_rand.nextInt(360);
+		// 彩度 (0 - 1)
+		//m_values[2] = 1.0f;
+		// 明度 (0 - 1)
+		//m_values[3] = 0.5f;
+		// 色
+		m_color = Color.HSVToColor((int)m_values[0], new float[]{m_values[1], m_values[2], m_values[3]});
 	}
 
 	public void frame(SampleSurfaceView owner) {
@@ -205,8 +255,8 @@ class Ball {
 		m_y += m_my;
 		if(bound){
 			int r = m_rand.nextInt(10);
-			r = 9;
-			float rate = 0.2f + m_rand.nextFloat() * 0.8f;
+			r = 4;
+			float rate = 0.5f + m_rand.nextFloat() * 0.2f;
 			owner.m_soundPool.play(owner.m_soundIds[r], 1.0f, 1.0f, 0, 0, rate);
 		}
 	}
@@ -215,15 +265,17 @@ class Ball {
 		Paint paint = new Paint();
 		//paint.setColor(Color.WHITE);
 		// 色相、明度、彩度
-		paint.setColor(Color.HSVToColor(200, new float[]{m_color, 1.0f, 0.5f}));
+		paint.setColor(m_color);
 		//paint.setAlpha(100);
 		canvas.drawCircle((float) m_x, (float) m_y, 50, paint);
 	}
 
+	private float[] m_values = new float[4];
 	private Random m_rand = new Random();
 	private double m_x = 0;
 	private double m_y = 0;
 	private double m_mx = 10;
 	private double m_my = 10;
-	private float m_color = 0; // 色相
+	private int m_color = 0; // Color
+	
 }
