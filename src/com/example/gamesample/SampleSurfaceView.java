@@ -3,6 +3,7 @@ package com.example.gamesample;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import android.R.integer;
 import android.app.Activity;
@@ -212,17 +213,31 @@ class Balls {
 		}
 	}
 
+	LinkedBlockingQueue<Ball> m_queue = new LinkedBlockingQueue<Ball>();
 	public void addBall(double x, double y){
+		//### 本当はキュー経由で追加しないと危険
 		Ball ball = new Ball(m_owner, x, y);
 		ball.onSeekChanged(m_values);
 		ball.setRandomColor();
-		m_balls.add(ball);
-		if(m_balls.size() > m_maxCount){
-			m_balls.remove(0); // 0番目を消す
-		}
+		m_queue.add(ball);
 	}
 	
 	public void frame() {
+		// キュー処理
+		Ball new_ball = m_queue.peek();
+		if(new_ball != null){
+			try{
+				m_queue.take();
+			}
+			catch(InterruptedException ex){
+			}
+			m_balls.add(new_ball);
+			if(m_balls.size() > m_maxCount){
+				m_balls.remove(0); // 0番目を消す
+			}
+		}
+
+		// 全ボール処理
 		for (int i = 0; i < m_balls.size(); i++) {
 			m_balls.get(i).frame(m_owner, m_accs);
 		}
