@@ -1,4 +1,6 @@
-package com.example.gamesample;
+package jp.clockup.tbs;
+
+import jp.clockup.tbs.R;
 
 import android.hardware.SensorManager;
 import android.os.Bundle;

@@ -1,9 +1,11 @@
-package com.example.gamesample;
+package jp.clockup.tbs;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.LinkedBlockingQueue;
+
+import jp.clockup.tbs.R;
 
 import android.R.integer;
 import android.app.Activity;
