@@ -49,7 +49,12 @@ public class SampleSurfaceView implements
 	private float[] m_values = new float[4];
 
 	private SensorManager m_sensorManager;
+	
+	private ChannelList m_channelList = new ChannelList();
 
+	public synchronized void pushChannelList(ChannelList channelList){
+		m_channelList = channelList;
+	}
 	
 	public SampleSurfaceView(SurfaceView view) {
 		SurfaceHolder holder = view.getHolder();
@@ -146,7 +151,9 @@ public class SampleSurfaceView implements
 				Rect dst = new Rect(0, 0, 1200, 1800);
 				canvas.drawBitmap(m_bgImage, src, dst, null);
 				// ボール
-				m_balls.draw(canvas);
+				synchronized(this){
+					m_balls.draw(canvas, m_channelList);
+				}
 				m_holder.unlockCanvasAndPost(canvas);
 			}
 
@@ -245,10 +252,11 @@ class Balls {
 		}
 	}
 
-	public void draw(Canvas canvas) {
+	public void draw(Canvas canvas, ChannelList channelList) {
 		// ボール自体の描画
 		for (int i = 0; i < m_balls.size(); i++) {
-			m_balls.get(i).draw(canvas);
+			Channel channel = channelList.getChannel(i);
+			m_balls.get(i).draw(canvas, channel);
 		}
 		// 線の描画
 		Paint paint = new Paint();
@@ -359,13 +367,24 @@ class Ball {
 		}
 	}
 
-	public void draw(Canvas canvas) {
+	public void draw(Canvas canvas, Channel channel) {
 		Paint paint = new Paint();
 		//paint.setColor(Color.WHITE);
 		// 色相、明度、彩度
 		paint.setColor(m_color);
 		//paint.setAlpha(100);
 		canvas.drawCircle((float) m_x, (float) m_y, (float)m_r, paint);
+		// チャンネル情報
+		if(channel != null){
+			paint = new Paint();
+			paint.setColor(Color.rgb(255, 255, 255));
+			paint.setTextSize(32);
+			canvas.drawText(channel.m_chName + ":" + channel.m_log, (float)m_x, (float)m_y, paint);
+			// 半径を変える
+			//m_r = 25 + m_rand.nextInt(50);
+			m_r = 25 + channel.m_log * 2;
+			
+		}
 	}
 
 	private float[] m_values = new float[4];

@@ -1,16 +1,90 @@
 package jp.clockup.tbs;
 
+import java.io.IOException;
+import java.io.InvalidObjectException;
+import java.util.ArrayList;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import jp.clockup.tbs.R;
 
 import android.hardware.SensorManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.R.integer;
 import android.app.Activity;
 import android.view.Menu;
 import android.view.SurfaceView;
+import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
+
+// チャンネルリスト
+class ChannelList{
+	ArrayList<Channel> m_list = new ArrayList<Channel>();
+	
+	public ChannelList(){
+	}
+	
+	public ChannelList(String jsonString) throws Exception{
+		JSONObject json = new JSONObject(jsonString);
+		JSONArray data = json.getJSONArray("data");
+		for(int i = 0; i < data.length(); i++){
+			try{
+				Channel channel = new Channel(data.getJSONObject(i));
+				m_list.add(channel);
+			}
+			catch(Exception ex){
+			}
+		}
+	}
+	
+	Channel getChannel(int index){
+		if(index >= 0 && index < m_list.size()){
+			return m_list.get(index);
+		}
+		return null;
+	}
+}
+
+// チャンネル
+class Channel{
+	// 番組情報
+	public String m_title = "";
+	
+	// 局情報
+	public String m_chName = "";
+	public int m_chNumber = 0;
+	public String m_chHash = "";
+	public String m_chLogo = "";
+	
+	// アクティブ情報
+	public int m_log = 0;
+	
+	public Channel(JSONObject obj) throws Exception{
+		// 番組情報
+		obj.getString("description");
+		m_title = obj.getString("title");
+		// 局
+		JSONObject station = obj.getJSONObject("station");
+		m_chName   = station.getString("name"); // 局の名前
+		m_chNumber = station.getInt("number"); // チャンネル？
+		m_chHash   = station.getString("hashtag"); // ハッシュタグ
+		m_chLogo   = station.getString("logo_url"); // ロゴURL
+		// 盛り上がり
+		m_log = obj.getInt("log");
+	}
+	public String toString(){
+		return String.format("%d:%s:%s\n", m_chNumber, m_chName, m_title);
+	}
+}
 
 public class MainActivity extends Activity implements SeekBar.OnSeekBarChangeListener {
 	SampleSurfaceView m_view;
@@ -18,6 +92,49 @@ public class MainActivity extends Activity implements SeekBar.OnSeekBarChangeLis
 	TextView[] m_texts = new TextView[4];
 	float[] m_values = new float[4];
 
+	public void buttonTest(View button){
+		// 通信テスト
+		new NetworkTask().execute("http://api2.tvz.in/1/program/current");
+	}
+	
+	class NetworkTask extends AsyncTask<String, Integer, String>{
+		@Override
+		protected String doInBackground(String... params) {
+			try{
+				String url = params[0];
+				HttpGet req = new HttpGet(url);
+				DefaultHttpClient client = new DefaultHttpClient();
+				HttpResponse res = client.execute(req);
+				String s = EntityUtils.toString(res.getEntity());
+				return s;
+			}
+			catch(IOException ex){
+				return "Error: " + ex.toString() + ", " + ex.getMessage();
+			}
+			catch(Exception ex){
+				return "Error: " + ex.toString() + ", " + ex.getMessage();
+			}
+		}
+		@Override
+		protected void onPostExecute(String result) {
+			if(result.startsWith("Error")){
+				Toast.makeText(MainActivity.this, result, Toast.LENGTH_SHORT).show();
+				return;
+			}
+			// JSON解釈
+			try{
+				ChannelList channelList = new ChannelList(result);
+				m_view.pushChannelList(channelList);
+				//Toast.makeText(MainActivity.this, pop, Toast.LENGTH_LONG).show();
+			}
+			catch(Exception ex){
+			}
+			// TODO Auto-generated method stub
+			//super.onPostExecute(result);
+			
+		}
+	}
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
