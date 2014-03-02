@@ -380,6 +380,7 @@ class Ball {
 			paint.setColor(Color.rgb(255, 255, 255));
 			paint.setTextSize(32);
 			canvas.drawText(channel.m_chName + ":" + channel.m_log, (float)m_x, (float)m_y, paint);
+			canvas.drawText(channel.m_title, (float)m_x, (float)m_y + 32, paint);
 			// 半径を変える
 			//m_r = 25 + m_rand.nextInt(50);
 			m_r = 25 + channel.m_log * 2;

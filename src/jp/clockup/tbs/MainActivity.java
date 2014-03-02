@@ -21,6 +21,7 @@ import android.app.Activity;
 import android.view.Menu;
 import android.view.SurfaceView;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -139,6 +140,10 @@ public class MainActivity extends Activity implements SeekBar.OnSeekBarChangeLis
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		
+		// ロゴ
+		ImageView imageView = (ImageView)findViewById(R.id.imageView1);
+		imageView.setAlpha(80);
 		
 		// Surface
 		SurfaceView surfaceView = (SurfaceView)findViewById(R.id.surfaceView1);
