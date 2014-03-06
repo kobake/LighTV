@@ -147,8 +147,10 @@ public class SampleSurfaceView implements
 			if(canvas != null){
 				// 背景
 				canvas.drawColor(0, PorterDuff.Mode.CLEAR);
-				Rect src = new Rect(0, 0, 600, 900);
-				Rect dst = new Rect(0, 0, 1200, 1800);
+//				Rect src = new Rect(0, 0, 600, 900);
+//				Rect dst = new Rect(0, 0, 1200, 1800);
+				Rect src = new Rect(0, 0, 600, 600);
+				Rect dst = new Rect(0, 0, 2000, 1200);
 				canvas.drawBitmap(m_bgImage, src, dst, null);
 				// ボール
 				synchronized(this){
@@ -292,8 +294,14 @@ class Ball {
 			m_y = y;
 		}
 		else{
-			m_x = r.nextInt(owner.m_width);
-			m_y = r.nextInt(owner.m_height);
+			if(owner.m_width != 0){
+				m_x = r.nextInt(owner.m_width); // ### ここがゼロになることがある
+				m_y = r.nextInt(owner.m_height);
+			}
+			else{
+				m_x = 100;
+				m_y = 100;
+			}
 		}
 		double speed = 5 + r.nextInt(20);
 		double rad = r.nextInt(360) / 360.0f * Math.PI * 2;
@@ -331,9 +339,19 @@ class Ball {
 
 	public void frame(SampleSurfaceView owner, float[] accs) {
 		boolean bound = false;
-		// 加速度
-		m_my += -accs[0] * 0.1 * 2; // -1 - +1
-		m_mx += -accs[1] * 0.1 * 2; // -2 - +2
+		// 加速度（横向きの場合）
+		m_my +=  accs[1] * 0.1 * 2; // -1 - +1
+		m_mx += -accs[0] * 0.1 * 2; // -2 - +2
+		// 速度調整
+		if(Math.abs(m_mx) > 10){
+			m_mx = 10 * Math.signum(m_mx);
+		}
+		if(Math.abs(m_my) > 10){
+			m_my = 10 * Math.signum(m_my);
+		}
+		// 加速度（縦向きの場合）
+		// m_my += -accs[0] * 0.1 * 2; // -1 - +1
+		// m_mx += -accs[1] * 0.1 * 2; // -2 - +2
 		// 移動
 		m_x += m_mx;
 		m_y += m_my;
