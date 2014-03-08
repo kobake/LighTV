@@ -99,7 +99,6 @@ public class MainActivity extends Activity implements
         SeekBar.OnSeekBarChangeListener {
     HueUtil m_hue = new HueUtil();
 
-
     @Override
     protected void onDestroy() {
         m_hue.onDestroy();
@@ -125,10 +124,15 @@ public class MainActivity extends Activity implements
         new NetworkTask().execute("http://api2.tvz.in/1/program/current");
     }
 
+    public void controlTV(int cannnel) {
+        Log.d("IR contorol", "select channnel " + cannnel);
+        mDevice.sendKey(mKeys.get(52 + cannnel));// sonytablet:55-63,
+                                                 // xperiatablet:53-61
+        Toast.makeText(this, "select channnel " + cannnel, Toast.LENGTH_SHORT).show();
+    }
+
     public void buttonMethodChannelTest(View button) {
-        Toast.makeText(this, "ちゃんねるてすと", Toast.LENGTH_SHORT).show();
-        Log.d("IR contorol", "onListItemClick " + 53);
-        mDevice.sendKey(mKeys.get(58));// sonytablet:60, xperiatablet:58
+        controlTV(6);
     }
 
     class NetworkTask extends AsyncTask<String, Integer, String> {
@@ -390,20 +394,22 @@ public class MainActivity extends Activity implements
             Toast.makeText(this, "まだ繋がってません", Toast.LENGTH_SHORT).show();
         }
     }
+
     public void buttonMethodRandomLights2(View button) {
-    	if(m_hue.isConnected()){
-    		m_hue.random2();
-    	}
-    	else{
-    		Toast.makeText(this, "まだ繋がってません", Toast.LENGTH_SHORT).show();
-    	}
+        if (m_hue.isConnected()) {
+            m_hue.random2();
+        }
+        else {
+            Toast.makeText(this, "まだ繋がってません", Toast.LENGTH_SHORT).show();
+        }
     }
+
     public void buttonMethodTimelineLights(View button) {
-    	if(m_hue.isConnected()){
-    		m_hue.timeline();
-    	}
-    	else{
-    		Toast.makeText(this, "まだ繋がってません", Toast.LENGTH_SHORT).show();
-    	}
+        if (m_hue.isConnected()) {
+            m_hue.timeline();
+        }
+        else {
+            Toast.makeText(this, "まだ繋がってません", Toast.LENGTH_SHORT).show();
+        }
     }
 }
