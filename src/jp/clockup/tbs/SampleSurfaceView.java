@@ -145,6 +145,7 @@ public class SampleSurfaceView implements
 	
 	@Override
 	public void run() {
+		/*
 		if(true){
 			while(true){
 				try{
@@ -154,6 +155,7 @@ public class SampleSurfaceView implements
 				}
 			}
 		}
+		*/
 
 		m_balls = new Balls(this, m_values);
 		// TODO Auto-generated method stub
@@ -364,12 +366,14 @@ class Ball {
 		m_my +=  accs[1] * 0.1 * 2; // -1 - +1
 		m_mx += -accs[0] * 0.1 * 2; // -2 - +2
 		// 速度調整
+		/*
 		if(Math.abs(m_mx) > 10){
 			m_mx = 10 * Math.signum(m_mx);
 		}
 		if(Math.abs(m_my) > 10){
 			m_my = 10 * Math.signum(m_my);
 		}
+		*/
 		// 加速度（縦向きの場合）
 		// m_my += -accs[0] * 0.1 * 2; // -1 - +1
 		// m_mx += -accs[1] * 0.1 * 2; // -2 - +2
