@@ -100,6 +100,10 @@ public class MainActivity extends Activity implements
 		// 通信テスト
 		new NetworkTask().execute("http://api2.tvz.in/1/program/current");
 	}
+	
+	public void buttonMethodChannelTest(View button){
+		Toast.makeText(this, "ちゃんねるてすと", Toast.LENGTH_SHORT).show();
+	}
 
 	class NetworkTask extends AsyncTask<String, Integer, String> {
 		@Override
