@@ -97,6 +97,7 @@ class Channel {
 
 public class MainActivity extends Activity implements
         SeekBar.OnSeekBarChangeListener {
+	TextView m_textViewSec = null;
     HueUtil m_hue = new HueUtil();
 
     @Override
@@ -248,10 +249,11 @@ public class MainActivity extends Activity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mDeviceId = 92550614;// sonytablet:63156005, xperiatablet:92550614
+        m_textViewSec = (TextView)findViewById(R.id.textViewSec);
+        mDeviceId = 92550614; // sonytablet:63156005, xperiatablet:92550614
 
         // Hue初期化
-        m_hue.onCreate(this);
+        m_hue.onCreate(this, m_textViewSec);
 
         // ロゴ
         ImageView imageView = (ImageView) findViewById(R.id.imageView1);
