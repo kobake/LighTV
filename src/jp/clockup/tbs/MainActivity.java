@@ -161,6 +161,11 @@ public class MainActivity extends Activity implements
 			startActivity(intent);
 			break;
 		}
+		case R.id.action_hue: {
+			Intent intent = new Intent(this, com.philips.lighting.quickstart.PHHomeActivity.class);
+			startActivity(intent);
+			break;
+		}
 		}
 		return true;
 	}
