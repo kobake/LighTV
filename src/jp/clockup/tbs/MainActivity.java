@@ -18,7 +18,9 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.R.integer;
 import android.app.Activity;
+import android.content.Intent;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.SurfaceView;
 import android.view.View;
 import android.widget.ImageView;
@@ -136,6 +138,22 @@ public class MainActivity extends Activity implements SeekBar.OnSeekBarChangeLis
 		}
 	}
 	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// TODO Auto-generated method stub
+		//return super.onOptionsItemSelected(item);
+		int id = item.getItemId();
+		switch(id){
+		case R.id.action_settings:
+			break;
+		case R.id.action_devicelist:
+			Intent intent = new Intent(this, DeviceListActivity.class);
+			startActivity(intent);
+			break;
+		}
+		return true;
+	}
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);

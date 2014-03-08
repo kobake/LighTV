@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2012 Sony Corporation -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="8dp"
+    android:paddingRight="8dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="24dp"
+        android:textStyle ="bold|italic"
+        android:text="Functions" />
+
+    <Button
+        android:id="@+id/button_register_device"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Register Device" />
+
+    <Button
+        android:id="@+id/button_observing_device"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Observing Device" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="24dp"
+        android:textStyle ="bold|italic"
+        android:text="Device list" />
+
+    <ListView
+        android:id="@android:id/list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1" />
+
+    <TextView
+        android:id="@android:id/empty"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="No devices" />
+
+</LinearLayout>

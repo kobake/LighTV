@@ -76,6 +76,7 @@ public class SampleSurfaceView implements
 	}
 	
 	public void onResume(Activity activity){
+		// Sound
 		m_soundPool = new SoundPool(8, AudioManager.STREAM_MUSIC, 0);
 		m_soundIds[0] = m_soundPool.load(activity, R.raw.b10, 0);
 		m_soundIds[1] = m_soundPool.load(activity, R.raw.b1, 0);
@@ -93,11 +94,19 @@ public class SampleSurfaceView implements
 			Sensor s = sensors.get(0);
 			m_sensorManager.registerListener(this, s, SensorManager.SENSOR_DELAY_UI);
 		}
+		// スレッド再開
+		if(m_thread != null){
+			b_pausing = false;
+		}
 	}
 	public void onPause(Activity activity){
 		m_soundPool.release();
 		// Listenerの登録解除
 		m_sensorManager.unregisterListener(this);
+		// 一旦スレッドも止める
+		if(m_thread != null){
+			b_pausing = true;
+		}
 	}
 
 	@Override
@@ -132,8 +141,20 @@ public class SampleSurfaceView implements
 		m_thread = null;
 	}
 
+	private boolean b_pausing = false;
+	
 	@Override
 	public void run() {
+		if(true){
+			while(true){
+				try{
+					Thread.sleep(10);
+				}
+				catch(InterruptedException ex){
+				}
+			}
+		}
+
 		m_balls = new Balls(this, m_values);
 		// TODO Auto-generated method stub
 		while (m_isAttached) {
