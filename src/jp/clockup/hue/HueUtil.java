@@ -248,6 +248,11 @@ public class HueUtil {
 		m_rainbow.execute("");
        
 	}
+
+	// タイムライン通りにライトを点灯させる
+	public void timeline(){
+		
+	}
 	
 	class Rainbow extends AsyncTask<String, Integer, String>{
 		

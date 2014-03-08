@@ -398,5 +398,12 @@ public class MainActivity extends Activity implements
     		Toast.makeText(this, "まだ繋がってません", Toast.LENGTH_SHORT).show();
     	}
     }
-
+    public void buttonMethodTimelineLights(View button) {
+    	if(m_hue.isConnected()){
+    		m_hue.timeline();
+    	}
+    	else{
+    		Toast.makeText(this, "まだ繋がってません", Toast.LENGTH_SHORT).show();
+    	}
+    }
 }
