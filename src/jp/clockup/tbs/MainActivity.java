@@ -387,7 +387,7 @@ public class MainActivity extends Activity implements
             m_hue.random();
         }
         else {
-            Toast.makeText(this, "まだ繋がってません", Toast.LENGTH_SHORT);
+            Toast.makeText(this, "まだ繋がってません", Toast.LENGTH_SHORT).show();
         }
     }
     public void buttonMethodRandomLights2(View button) {
