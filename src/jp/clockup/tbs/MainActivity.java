@@ -136,7 +136,7 @@ public class MainActivity extends Activity implements
     public void buttonMethodChannelTest(View button) {
         Toast.makeText(this, "ちゃんねるてすと", Toast.LENGTH_SHORT).show();
         Log.d("IR contorol", "onListItemClick " + 53);
-        mDevice.sendKey(mKeys.get(60));
+        mDevice.sendKey(mKeys.get(58));// sonytablet:60, xperiatablet:58
     }
 
     class NetworkTask extends AsyncTask<String, Integer, String> {
@@ -252,7 +252,7 @@ public class MainActivity extends Activity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mDeviceId = 63156005;
+        mDeviceId = 92550614;// sonytablet:63156005, xperiatablet:92550614
 
         // Hue初期化
         m_hue.onCreate(this);
