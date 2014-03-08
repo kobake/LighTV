@@ -3,6 +3,9 @@ package jp.clockup.tbs;
 import java.io.IOException;
 import java.io.InvalidObjectException;
 import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Random;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -11,6 +14,14 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import com.philips.lighting.hue.listener.PHLightListener;
+import com.philips.lighting.hue.sdk.PHHueSDK;
+import com.philips.lighting.model.PHBridge;
+import com.philips.lighting.model.PHHueError;
+import com.philips.lighting.model.PHLight;
+import com.philips.lighting.model.PHLightState;
+
+import jp.clockup.hue.HueUtil;
 import jp.clockup.tbs.R;
 
 import android.hardware.SensorManager;
@@ -19,6 +30,7 @@ import android.os.Bundle;
 import android.R.integer;
 import android.app.Activity;
 import android.content.Intent;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SurfaceView;
@@ -91,6 +103,23 @@ class Channel {
 
 public class MainActivity extends Activity implements
 		SeekBar.OnSeekBarChangeListener {
+	HueUtil m_hue = new HueUtil();
+    
+    public void buttonMethodRandomLights(View button) {
+    	if(m_hue.isConnected()){
+    		m_hue.random();
+    	}
+    	else{
+    		Toast.makeText(this, "まだ繋がってません", Toast.LENGTH_SHORT);
+    	}
+    }
+    
+	@Override
+	protected void onDestroy() {
+		m_hue.onDestroy();
+		super.onDestroy();
+	}
+
 	SampleSurfaceView m_view;
 	SeekBar[] m_seeks = new SeekBar[4];
 	TextView[] m_texts = new TextView[4];
@@ -174,6 +203,9 @@ public class MainActivity extends Activity implements
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+
+		// Hue初期化
+		m_hue.onCreate(this);
 
 		// ロゴ
 		ImageView imageView = (ImageView) findViewById(R.id.imageView1);

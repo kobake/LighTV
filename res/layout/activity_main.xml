@@ -109,6 +109,13 @@
             android:onClick="buttonMethodChannelTest"
             android:text="CH" />
 
+        <Button
+            android:id="@+id/button3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="buttonMethodRandomLights"
+            android:text="RandomLights" />
+
         <TextView
             android:id="@+id/textView5"
             style="@style/VirtualLight"
