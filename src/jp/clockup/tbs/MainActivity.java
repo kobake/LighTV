@@ -99,14 +99,6 @@ public class MainActivity extends Activity implements
         SeekBar.OnSeekBarChangeListener {
     HueUtil m_hue = new HueUtil();
 
-    public void buttonMethodRandomLights(View button) {
-        if (m_hue.isConnected()) {
-            m_hue.random();
-        }
-        else {
-            Toast.makeText(this, "まだ繋がってません", Toast.LENGTH_SHORT);
-        }
-    }
 
     @Override
     protected void onDestroy() {
@@ -388,6 +380,23 @@ public class MainActivity extends Activity implements
             mKeyLabels.add("type: " + key.getType() + ", label: " + label + ", learnt: " + learnt);
             mKeys.add(key);
         }
+    }
+
+    public void buttonMethodRandomLights(View button) {
+        if (m_hue.isConnected()) {
+            m_hue.random();
+        }
+        else {
+            Toast.makeText(this, "まだ繋がってません", Toast.LENGTH_SHORT);
+        }
+    }
+    public void buttonMethodRandomLights2(View button) {
+    	if(m_hue.isConnected()){
+    		m_hue.random2();
+    	}
+    	else{
+    		Toast.makeText(this, "まだ繋がってません", Toast.LENGTH_SHORT).show();
+    	}
     }
 
 }

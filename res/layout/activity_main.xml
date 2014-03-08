@@ -116,6 +116,13 @@
             android:onClick="buttonMethodRandomLights"
             android:text="RandomLights" />
 
+        <Button
+            android:id="@+id/button4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="buttonMethodRandomLights2"
+            android:text="RandomLights2" />
+
         <TextView
             android:id="@+id/textView5"
             style="@style/VirtualLight"

@@ -8,6 +8,7 @@ import jp.clockup.tbs.R;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.util.Log;
 import android.widget.ListView;
@@ -119,6 +120,7 @@ public class HueUtil {
 
 		@Override
 		public void onConnectionResumed(PHBridge bridge) {
+			Log.v(TAG, "onConnectionResumed");
 			/*
 			if (PHHomeActivity.this.isFinishing())
 				return;
@@ -145,8 +147,8 @@ public class HueUtil {
 
 		@Override
 		public void onConnectionLost(PHAccessPoint accessPoint) {
-			/*
 			Log.v(TAG, "onConnectionLost : " + accessPoint.getIpAddress());
+			/*
 			if (!m_phHueSDK.getDisconnectedAccessPoint().contains(accessPoint)) {
 				m_phHueSDK.getDisconnectedAccessPoint().add(accessPoint);
 			}
@@ -198,6 +200,7 @@ public class HueUtil {
         }
         @Override
         public void onError(int arg0, String arg1) {  
+            Log.e(TAG, "app onError: " + arg1);
         }
     };
 
@@ -206,7 +209,7 @@ public class HueUtil {
     }
     
 	public void random() {
-		// 繋がってないトダメだよ!!
+		// 繋がってないとダメだよ!!
 		if(!m_connect_ok){
 			return;
 		}
@@ -219,10 +222,72 @@ public class HueUtil {
         for (PHLight light : allLights) {
             PHLightState lightState = new PHLightState();
             lightState.setHue(rand.nextInt(MAX_HUE));
+            lightState.setSaturation(254);
+            lightState.setBrightness(254);
+            
             // To validate your lightstate is valid (before sending to the bridge) you can use:  
             // String validState = lightState.validateState();
             bridge.updateLightState(light, lightState, m_listener_app);
             //  bridge.updateLightState(light, lightState);   // If no bridge response is required then use this simpler form.
         }
+	}
+	
+	Rainbow m_rainbow = null;
+	public void random2() {
+		// 繋がってないとダメだよ!!
+		if(!m_connect_ok){
+			return;
+		}
+		
+		// 既に実行中なら何もしない
+		if(m_rainbow != null){
+			return;
+		}
+		
+		m_rainbow = new Rainbow();
+		m_rainbow.execute("");
+       
+	}
+	
+	class Rainbow extends AsyncTask<String, Integer, String>{
+		
+		@Override
+		protected void onPostExecute(String result) {
+			// TODO Auto-generated method stub
+			m_rainbow = null;
+			super.onPostExecute(result);
+		}
+
+		@Override
+		protected String doInBackground(String... params) {
+	        PHBridge bridge = m_phHueSDK.getSelectedBridge();
+	        List<PHLight> allLights = bridge.getResourceCache().getAllLights();
+        	int hue = 270; // 0～360
+			for(int i = 0; i < 100; i++){
+	           Log.w(TAG, "hue is " + hue);
+		        for (PHLight light : allLights) {
+		            PHLightState lightState = new PHLightState();
+		            lightState.setOn(true);
+		            lightState.setHue((int)(hue / 360.0f * MAX_HUE));// 色相  rand.nextInt(MAX_HUE));
+		            lightState.setSaturation(254); // 彩度 0～254
+		            lightState.setBrightness(100); // 明度 0～254
+		            
+		            hue += 10;
+		            if(hue > 360)hue -= 360;
+		            
+		            // To validate your lightstate is valid (before sending to the bridge) you can use:  
+		            // String validState = lightState.validateState();
+		            bridge.updateLightState(light, lightState, m_listener_app);
+		            //  bridge.updateLightState(light, lightState);   // If no bridge response is required then use this simpler form.
+		        }
+		        try{
+		        	Thread.sleep(100);
+		        }
+		        catch(InterruptedException ex){
+		        }
+	        }
+           Log.w(TAG, "thread done");
+			return null;
+		}
 	}
 }

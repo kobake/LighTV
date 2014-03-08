@@ -402,7 +402,7 @@ class Ball {
 			bound = true;
 		}
 		// 跳ね返り音
-		if(bound){
+		if(bound && false){
 			int r = m_rand.nextInt(10);
 			r = 4;
 			float rate = 0.5f + m_rand.nextFloat() * 0.2f;
