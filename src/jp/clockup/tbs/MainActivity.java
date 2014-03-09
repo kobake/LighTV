@@ -23,6 +23,7 @@ import com.sony.remotecontrol.ir.Key;
 import com.sony.remotecontrol.ir.Status;
 
 import jp.clockup.eaw.EawActivity;
+import jp.clockup.eaw.EawController;
 import jp.clockup.game.Ball;
 import jp.clockup.game.ColorController;
 import jp.clockup.hue.HueUtil;
@@ -40,16 +41,21 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import jp.clockup.eaw.EawController;
 
 
 public class MainActivity extends Activity implements
-        SeekBar.OnSeekBarChangeListener, Tvzin.Listener {
+        SeekBar.OnSeekBarChangeListener, Tvzin.Listener, EawController.Listener {
 	TextView m_textViewSec = null;
 	TextView m_textViewSync = null;
 	
 	// 子モジュール
     HueUtil m_hue = new HueUtil();
     Tvzin m_tvzin = new Tvzin();
+    EawController m_eaw = new EawController();
     public IrController m_ir = new IrController(this);
 
     @Override
@@ -75,6 +81,58 @@ public class MainActivity extends Activity implements
 
     public static final String EXTRA_DEVICE_ID = "device_id";
     private static final String TAG = "RemoteActivity";
+
+    // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
+    // タイマー
+    // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
+    MyTimerTask timerTask = null;
+    Timer       mTimer    = null;
+    Handler     mHandler  = new Handler();
+    int         m_counter = 0;
+    class MyTimerTask extends TimerTask{
+        @Override
+        public void run() {
+            // mHandlerを通じてUI Threadへ処理をキューイング
+            mHandler.post( new Runnable() {
+                public void run() {
+                	m_counter++;
+                	//m_textViewSync.setText("" + m_counter);
+                	if(m_counter == 1){
+                		m_eaw.toggle(); // 最初のスタート
+                	}
+                }
+            });
+        }
+    }
+    private void startTimer(){
+    	if(mTimer == null){
+            // タイマーの初期化処理
+            timerTask = new MyTimerTask();
+            mTimer = new Timer(true);
+            // delayミリ秒あとにperiodミリ秒間隔でタスク実行
+            mTimer.schedule( timerTask, 1000, 1000);
+        }
+    }
+    private void stopTimer(){
+    	if(mTimer != null){
+            mTimer.cancel();
+            mTimer = null;
+        }
+    }
+    // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
+    // EAW 音声透かし
+    // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
+	@Override
+	public void onReceiveEaw(int eaw) {
+		if(eaw >= 0){
+			m_textViewSync.setText("同期状態: キミハブレイクを認識(" + eaw + ")");
+		}
+	}
+
+	@Override
+	public void onErrorEaw(String msg) {
+		Toast.makeText(this, "EAW Error: " + msg, Toast.LENGTH_SHORT);
+	}
 
     // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
     // TVZIN (Twitter盛り上がり)
@@ -215,6 +273,8 @@ public class MainActivity extends Activity implements
             m_seeks[i].setOnSeekBarChangeListener(this);
         }
         m_ir.onCreate(this);
+        m_eaw.onCreate(this, this.getBaseContext().getApplicationContext());
+        startTimer();
     }
 
     @Override
@@ -229,7 +289,7 @@ public class MainActivity extends Activity implements
         if (m_view != null) {
             m_view.onResume(this);
         }
-        // TODO Auto-generated method stub
+        m_eaw.onResume();
         super.onResume();
     }
 
@@ -238,9 +298,16 @@ public class MainActivity extends Activity implements
         if (m_view != null) {
             m_view.onPause(this);
         }
-        // TODO Auto-generated method stub
+        m_eaw.onPause();
         super.onPause();
     }
+    
+	@Override
+	protected void onStop() {
+		m_eaw.onStop();
+		super.onStop();
+	}
+
 
     // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
     // SeekBar //
@@ -271,6 +338,7 @@ public class MainActivity extends Activity implements
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
     }
+
 
 
 
