@@ -86,8 +86,35 @@ public class MainActivity extends Activity implements
     public void buttonMethodChannelTest(View button) {
         m_ir.controlTV(6);
     }
-
-
+    
+    // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
+    // Hue操作系
+    // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
+    public void buttonMethodRandomLights(View button) {
+        if (!m_hue.isConnected()) {
+        	Toast.makeText(this, "まだ繋がってません", Toast.LENGTH_SHORT).show();
+        	return;
+        }
+        m_hue.random();
+    }
+    public void buttonMethodRandomLights2(View button) {
+        if (!m_hue.isConnected()) {
+        	Toast.makeText(this, "まだ繋がってません", Toast.LENGTH_SHORT).show();
+        	return;
+        }
+        m_hue.random2();
+    }
+    public void buttonMethodTimelineLights(View button) {
+        if (!m_hue.isConnected()) {
+        	Toast.makeText(this, "まだ繋がってません", Toast.LENGTH_SHORT).show();
+        	return;
+        }
+        m_hue.timeline();
+    }
+    
+    // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
+    // メニューUI等
+    // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // TODO Auto-generated method stub
@@ -236,31 +263,5 @@ public class MainActivity extends Activity implements
     }
 
 
-    public void buttonMethodRandomLights(View button) {
-        if (m_hue.isConnected()) {
-            m_hue.random();
-        }
-        else {
-            Toast.makeText(this, "まだ繋がってません", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    public void buttonMethodRandomLights2(View button) {
-        if (m_hue.isConnected()) {
-            m_hue.random2();
-        }
-        else {
-            Toast.makeText(this, "まだ繋がってません", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    public void buttonMethodTimelineLights(View button) {
-        if (m_hue.isConnected()) {
-            m_hue.timeline();
-        }
-        else {
-            Toast.makeText(this, "まだ繋がってません", Toast.LENGTH_SHORT).show();
-        }
-    }
 
 }
