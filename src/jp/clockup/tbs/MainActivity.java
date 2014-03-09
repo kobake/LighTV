@@ -22,7 +22,9 @@ import com.sony.remotecontrol.ir.IrManagerFactory;
 import com.sony.remotecontrol.ir.Key;
 import com.sony.remotecontrol.ir.Status;
 
+import jp.clockup.game.Ball;
 import jp.clockup.hue.HueUtil;
+import jp.clockup.ir.ChannelList;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -35,65 +37,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-// チャンネルリスト
-class ChannelList {
-    ArrayList<Channel> m_list = new ArrayList<Channel>();
-
-    public ChannelList() {
-    }
-
-    public ChannelList(String jsonString) throws Exception {
-        JSONObject json = new JSONObject(jsonString);
-        JSONArray data = json.getJSONArray("data");
-        for (int i = 0; i < data.length(); i++) {
-            try {
-                Channel channel = new Channel(data.getJSONObject(i));
-                m_list.add(channel);
-            } catch (Exception ex) {
-            }
-        }
-    }
-
-    Channel getChannel(int index) {
-        if (index >= 0 && index < m_list.size()) {
-            return m_list.get(index);
-        }
-        return null;
-    }
-}
-
-// チャンネル
-class Channel {
-    // 番組情報
-    public String m_title = "";
-
-    // 局情報
-    public String m_chName = "";
-    public int m_chNumber = 0;
-    public String m_chHash = "";
-    public String m_chLogo = "";
-
-    // アクティブ情報
-    public int m_log = 0;
-
-    public Channel(JSONObject obj) throws Exception {
-        // 番組情報
-        obj.getString("description");
-        m_title = obj.getString("title");
-        // 局
-        JSONObject station = obj.getJSONObject("station");
-        m_chName = station.getString("name"); // 局の名前
-        m_chNumber = station.getInt("number"); // チャンネル？
-        m_chHash = station.getString("hashtag"); // ハッシュタグ
-        m_chLogo = station.getString("logo_url"); // ロゴURL
-        // 盛り上がり
-        m_log = obj.getInt("log");
-    }
-
-    public String toString() {
-        return String.format("%d:%s:%s\n", m_chNumber, m_chName, m_title);
-    }
-}
 
 public class MainActivity extends Activity implements
         SeekBar.OnSeekBarChangeListener {
