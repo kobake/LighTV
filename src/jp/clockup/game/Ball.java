@@ -155,8 +155,8 @@ public class Ball {
 	public double m_x = 0;
 	public double m_y = 0;
 	public double m_r = 50; // 半径
-	private double m_mx = 10;
-	private double m_my = 10;
+	public double m_mx = 10;
+	public double m_my = 10;
 	private int m_color = 0; // Color
 	
 }

@@ -61,6 +61,10 @@ public class SampleSurfaceView implements
 		m_channelList = channelList;
 	}
 	
+	public synchronized void pushWind(){
+		m_balls.pushWind();
+	}
+	
 	public SampleSurfaceView(SurfaceView view) {
 		SurfaceHolder holder = view.getHolder();
 		holder.addCallback(this);

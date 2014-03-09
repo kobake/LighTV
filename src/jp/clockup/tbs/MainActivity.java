@@ -89,7 +89,8 @@ public class MainActivity extends Activity implements
     Timer       mTimer    = null;
     Handler     mHandler  = new Handler();
     int         m_counter = 0;
-    long        m_lastTvzin = 0;
+    long        m_lastTvzin = 0; // 最後にTVZIN同期を送った時刻
+    long		m_lastBall = 0; // 最後にボールぶらしを行った時刻
     class MyTimerTask extends TimerTask{
         @Override
         public void run() {
@@ -102,11 +103,20 @@ public class MainActivity extends Activity implements
                 	if(m_counter == 1){
                 		m_eaw.toggle();
                 	}
+                	if(m_counter < 3)return;
                 	
                 	//　TVZIN情報の定期取得 (1分おき)
                 	long tvzin_elapsed = System.currentTimeMillis() - m_lastTvzin;
                 	if(tvzin_elapsed >= 60 * 1000){
+                		m_lastTvzin = System.currentTimeMillis();
                 		m_tvzin.request(MainActivity.this);
+                	}
+
+                	//　ボールぶらし (10秒おき)
+                	long ball_elapsed = System.currentTimeMillis() - m_lastBall;
+                	if(ball_elapsed >= 5 * 1000){
+                		m_lastBall = System.currentTimeMillis();
+                		m_view.pushWind();
                 	}
                 }
             });

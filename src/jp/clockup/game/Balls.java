@@ -4,10 +4,14 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import com.google.gdata.data.finance.CostBasis;
+import com.google.gdata.data.webmastertools.SitemapsNewsEntry.PublicationLabel;
+
 import jp.clockup.ir.Channel;
 import jp.clockup.ir.ChannelList;
 import jp.clockup.tbs.MainActivity;
 import jp.clockup.tbs.SampleSurfaceView;
+import android.R.string;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -16,7 +20,9 @@ import android.util.Log;
 
 
 public class Balls {
-	private SampleSurfaceView m_owner;
+    private static final String TAG = "RemoteActivity";
+
+    private SampleSurfaceView m_owner;
 	private ArrayList<Ball> m_balls = new ArrayList<Ball>();
 	private int m_maxCount = 10;
 	private float[] m_values = new float[4];
@@ -63,6 +69,11 @@ public class Balls {
 	public void pushTouch(int x, int y){
 		Point p = new Point(x, y);
 		m_touchQueue.add(p);
+	}
+	
+	int m_wind = 0;
+	public synchronized void pushWind(){
+		m_wind = 1;
 	}
 	
 	public void frame(ChannelList channelList) {
@@ -114,6 +125,35 @@ public class Balls {
 			// 見つかったボールについて処理
 			if(found != null){
 				found.onTouch(found_channel);
+			}
+		}
+		
+		// キュー処理：風
+		synchronized(this){
+			if(m_wind != 0){
+				m_wind = 0;
+				// ぶらす
+				Log.w(TAG, "----WIND----");
+				Random r = new Random();
+				for (int i = 0; i < m_balls.size(); i++) {
+					// 速い場合は何もしない
+					Ball ball = m_balls.get(i);
+					float current_speed2 = (float)((ball.m_mx * ball.m_mx) + (ball.m_my * ball.m_my));
+					if(current_speed2 >= 8 * 8){
+						
+						ball.m_mx *= 0.9f;
+						ball.m_my *= 0.9f;
+					}
+					else{
+						float power = r.nextInt(100) / 100.0f; // 0～1.0
+						power = 0.9f + power * 0.2f; // 1～1.1
+						float xx = (r.nextInt(100) / 100.0f) * 6 - 3; 
+						float yy = (r.nextInt(100) / 100.0f) * 6 - 3; 
+						power = 0.9f + power * 0.2f; // 1～1.1
+						ball.m_mx += xx;
+						ball.m_my += yy;
+					}
+				}
 			}
 		}
 
