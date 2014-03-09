@@ -180,8 +180,8 @@ public class SampleSurfaceView implements
 				canvas.drawColor(0, PorterDuff.Mode.CLEAR);
 //				Rect src = new Rect(0, 0, 600, 900);
 //				Rect dst = new Rect(0, 0, 1200, 1800);
-				Rect src = new Rect(0, 0, 600, 600);
-				Rect dst = new Rect(0, 0, 2000, 1200);
+				Rect src = new Rect(0, 0, 2000, 900);
+				Rect dst = new Rect(0, 0, 2600, 1200);
 				canvas.drawBitmap(m_bgImage, src, dst, null);
 				// ボール
 				synchronized(this){

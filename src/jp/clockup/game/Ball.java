@@ -144,7 +144,8 @@ public class Ball {
 			canvas.drawText(channel.m_title, (float)m_x, (float)m_y + 32, paint);
 			// 半径を変える
 			//m_r = 25 + m_rand.nextInt(50);
-			m_r = 25 + channel.m_log * 2;
+			//m_r = 25 + channel.m_log * 2;
+			m_r = 50 + Math.pow(channel.m_log, 0.5) * 20;
 			
 		}
 	}
