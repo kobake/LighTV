@@ -103,63 +103,69 @@
 
         <Button
             android:id="@+id/button1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
             android:onClick="buttonTest"
             android:text="Button" />
 
         <Button
             android:id="@+id/button2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
             android:onClick="buttonMethodChannelTest"
             android:text="CH" />
 
         <Button
             android:id="@+id/button3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
             android:onClick="buttonMethodRandomLights"
             android:text="RandomLights" />
 
         <Button
             android:id="@+id/button4"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
             android:onClick="buttonMethodRandomLights2"
             android:text="RandomLights2" />
 
         <Button
             android:id="@+id/button5"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
             android:onClick="buttonMethodTimelineLights"
             android:text="timeline" />
 
         <TextView
             android:id="@+id/textView5"
             style="@style/VirtualLight"
-            android:text="1" />
+            android:text="0" />
 
         <TextView
             android:id="@+id/textView6"
             style="@style/VirtualLight"
-            android:text="2" />
+            android:text="1" />
 
         <TextView
             android:id="@+id/textView7"
             style="@style/VirtualLight"
-            android:text="3" />
+            android:text="2" />
 
         <TextView
             android:id="@+id/textView8"
             style="@style/VirtualLight"
-            android:text="4" />
+            android:text="3" />
 
         <TextView
             android:id="@+id/textView9"
             style="@style/VirtualLight"
-            android:text="5" />
+            android:text="4" />
+
+        <TextView
+            android:id="@+id/textViewSync"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="同期状態:" />
 
     </LinearLayout>
 

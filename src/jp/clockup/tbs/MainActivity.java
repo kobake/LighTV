@@ -22,6 +22,7 @@ import com.sony.remotecontrol.ir.IrManagerFactory;
 import com.sony.remotecontrol.ir.Key;
 import com.sony.remotecontrol.ir.Status;
 
+import jp.clockup.eaw.EawActivity;
 import jp.clockup.game.Ball;
 import jp.clockup.game.ColorController;
 import jp.clockup.hue.HueUtil;
@@ -44,6 +45,7 @@ import java.util.List;
 public class MainActivity extends Activity implements
         SeekBar.OnSeekBarChangeListener, Tvzin.Listener {
 	TextView m_textViewSec = null;
+	TextView m_textViewSync = null;
 	
 	// 子モジュール
     HueUtil m_hue = new HueUtil();
@@ -140,6 +142,18 @@ public class MainActivity extends Activity implements
                 startActivity(intent);
                 break;
             }
+            case R.id.action_hue_random: { // Hueランダム確認
+            	buttonMethodRandomLights(null);
+                break;
+            }
+            case R.id.action_hue_timeline: { // Hueタイムライン
+            	buttonMethodTimelineLights(null);
+                break;
+            }
+            case R.id.action_tvzin: { // TVZIN手動同期
+            	buttonTest(null);
+                break;
+            }
         }
         return true;
     }
@@ -151,6 +165,7 @@ public class MainActivity extends Activity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         m_textViewSec = (TextView)findViewById(R.id.textViewSec);
+        m_textViewSync = (TextView)findViewById(R.id.textViewSync);
 
         // Hue初期化
         m_hue.onCreate(this, m_textViewSec);

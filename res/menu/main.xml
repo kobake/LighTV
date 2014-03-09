@@ -4,9 +4,15 @@
         android:id="@+id/action_settings"
         android:orderInCategory="100"
         android:title="@string/action_settings"/>
+    <!-- IR -->
     <item android:id="@+id/action_devicelist" android:title="デバイスリスト"></item>
-    <item android:id="@+id/action_eaw" android:title="EAW 音声透かし"></item>
-    <item android:id="@+id/action_hue" android:title="Hue 電球"></item>
-    
+    <!-- TVZIN -->
+    <item android:id="@+id/action_tvzin" android:title="TVZIN手動同期"></item>
+    <!-- Hue -->
+    <item android:id="@+id/action_hue" android:title="Hue設定"></item>
+    <item android:id="@+id/action_hue_random" android:title="Hueランダム確認"></item>
+    <item android:id="@+id/action_hue_timeline" android:title="Hueタイムライン"></item>
+    <!--  エヴィクサー -->
+    <item android:id="@+id/action_eaw" android:title="EAWテスト"></item>
     
 </menu>

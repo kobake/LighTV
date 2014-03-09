@@ -1,4 +1,6 @@
-package jp.clockup.tbs;
+package jp.clockup.eaw;
+
+import jp.clockup.tbs.R;
 
 import com.evixar.eaw_utilities.EAWSDK;
 
@@ -42,7 +44,6 @@ public class EawActivity extends Activity {
 		
 		finishEawInit = false;
 		init();
-		
 	}
 	
 	@Override
@@ -153,3 +154,4 @@ public class EawActivity extends Activity {
 	}
 
 }
+
