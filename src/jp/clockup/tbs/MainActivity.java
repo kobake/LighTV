@@ -23,6 +23,7 @@ import com.sony.remotecontrol.ir.Key;
 import com.sony.remotecontrol.ir.Status;
 
 import jp.clockup.game.Ball;
+import jp.clockup.game.ColorController;
 import jp.clockup.hue.HueUtil;
 import jp.clockup.ir.ChannelList;
 import jp.clockup.ir.IrController;
@@ -175,14 +176,8 @@ public class MainActivity extends Activity implements
         m_texts[3] = (TextView) findViewById(R.id.textView4);
 
         // -- -- 初期値 -- -- //
-        // a アルファ
-        m_values[0] = 89;
-        // h 色相
-        m_values[1] = 359;
-        // s 彩度
-        m_values[2] = 0.51f;
-        // v 明度
-        m_values[3] = 0.98f;
+        ColorController.initialColorValues(m_values);
+        
         // 表示
         for (int i = 0; i < 4; i++) {
             m_texts[i].setText(String.format("%.2f", m_values[i]));

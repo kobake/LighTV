@@ -81,8 +81,8 @@ public class Ball {
 	public void frame(SampleSurfaceView owner, float[] accs) {
 		boolean bound = false;
 		// 加速度（横向きの場合）
-		m_my +=  accs[1] * 0.1 * 2; // -1 - +1
-		m_mx += -accs[0] * 0.1 * 2; // -2 - +2
+		m_my +=  accs[1] * 0.1 * 2 * 0.3; // -1 - +1
+		m_mx += -accs[0] * 0.1 * 2 * 0.3; // -2 - +2
 		// 速度調整
 		/*
 		if(Math.abs(m_mx) > 10){
