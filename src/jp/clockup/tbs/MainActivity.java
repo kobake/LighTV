@@ -25,6 +25,8 @@ import com.sony.remotecontrol.ir.Status;
 import jp.clockup.game.Ball;
 import jp.clockup.hue.HueUtil;
 import jp.clockup.ir.ChannelList;
+import jp.clockup.ir.IrController;
+import jp.clockup.tvzin.Tvzin;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -39,15 +41,29 @@ import java.util.List;
 
 
 public class MainActivity extends Activity implements
-        SeekBar.OnSeekBarChangeListener {
+        SeekBar.OnSeekBarChangeListener, Tvzin.Listener {
 	TextView m_textViewSec = null;
+	
+	// 子モジュール
     HueUtil m_hue = new HueUtil();
+    Tvzin m_tvzin = new Tvzin();
+    public IrController m_ir = new IrController(this);
 
     @Override
     protected void onDestroy() {
         m_hue.onDestroy();
         super.onDestroy();
     }
+    
+	@Override
+	public void onGotChannelList(ChannelList channelList) {
+		if(channelList == null){
+            Toast.makeText(this, "tvzin error", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        m_view.pushChannelList(channelList);
+	}
+
 
     SampleSurfaceView m_view;
     SeekBar[] m_seeks = new SeekBar[4];
@@ -56,109 +72,21 @@ public class MainActivity extends Activity implements
 
     public static final String EXTRA_DEVICE_ID = "device_id";
     private static final String TAG = "RemoteActivity";
-    private int mDeviceId;
-    private Device mDevice;
-    private ArrayList<String> mKeyLabels = new ArrayList<String>();
-    private ArrayList<Key> mKeys = new ArrayList<Key>();
-    private Handler mMainThread = new Handler();
-    private IrManager mIrMgr;
 
+    // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
+    // TVZIN (Twitter盛り上がり)
+    // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
     public void buttonTest(View button) {
-        // 通信テスト
-        new NetworkTask().execute("http://api2.tvz.in/1/program/current");
+    	m_tvzin.request(this);
     }
 
-    public void controlTV(int cannnel) {
-        Log.d("IR contorol", "select channnel " + cannnel);
-        mDevice.sendKey(mKeys.get(52 + cannnel));// sonytablet:55-63,
-                                                 // xperiatablet:53-61
-        //Toast.makeText(this, "select channnel " + cannnel, Toast.LENGTH_SHORT).show();
-    }
-
+    // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
+    // リモコン ソニー IR
+    // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
     public void buttonMethodChannelTest(View button) {
-        controlTV(6);
+        m_ir.controlTV(6);
     }
 
-    class NetworkTask extends AsyncTask<String, Integer, String> {
-        @Override
-        protected String doInBackground(String... params) {
-            try {
-                String url = params[0];
-                HttpGet req = new HttpGet(url);
-                DefaultHttpClient client = new DefaultHttpClient();
-                HttpResponse res = client.execute(req);
-                String s = EntityUtils.toString(res.getEntity());
-                return s;
-            } catch (IOException ex) {
-                return "Error: " + ex.toString() + ", " + ex.getMessage();
-            } catch (Exception ex) {
-                return "Error: " + ex.toString() + ", " + ex.getMessage();
-            }
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-            if (result.startsWith("Error")) {
-                Toast.makeText(MainActivity.this, result, Toast.LENGTH_SHORT)
-                        .show();
-                return;
-            }
-            // JSON解釈
-            try {
-                ChannelList channelList = new ChannelList(result);
-                m_view.pushChannelList(channelList);
-                // Toast.makeText(MainActivity.this, pop,
-                // Toast.LENGTH_LONG).show();
-            } catch (Exception ex) {
-            }
-            // TODO Auto-generated method stub
-            // super.onPostExecute(result);
-
-        }
-    }
-
-    private IrManager.Listener mMgrListener = new IrManager.Listener() {
-
-        @Override
-        public void onActivated(IrManager irMgr) {
-            Log.d(TAG, "onActivated");
-
-            final IrManager mgr = irMgr;
-
-            mMainThread.post(new Runnable() {
-                public void run() {
-                    List<Device> devices = mgr.getRegisteredDevices();
-                    for (Device device : devices) {
-                        if (device.getInstanceId() == mDeviceId) {
-                            mDevice = device;
-                            Log.v(TAG, "device " + device);
-                            // mShowControlPannelButton.setEnabled(true);
-                            break;
-                        }
-                    }
-                    // showDeviceInfo();
-                    setupKeyList();
-                    onContentChanged();
-                }
-            });
-        }
-
-        @Override
-        public void onError(Status reason) {
-        }
-
-        @Override
-        public void onDeviceUnregistered(Device device) {
-        }
-
-        @Override
-        public void onDeviceRegistered(Device device) {
-        }
-
-        @Override
-        public void onDeviceAttributeChanged(Device device) {
-        }
-    };
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -195,7 +123,6 @@ public class MainActivity extends Activity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         m_textViewSec = (TextView)findViewById(R.id.textViewSec);
-        mDeviceId = 92550614; // sonytablet:63156005, xperiatablet:92550614
 
         // Hue初期化
         m_hue.onCreate(this, m_textViewSec);
@@ -250,8 +177,7 @@ public class MainActivity extends Activity implements
         for (int i = 0; i < 4; i++) {
             m_seeks[i].setOnSeekBarChangeListener(this);
         }
-        mIrMgr = IrManagerFactory.getNewInstance();
-        mIrMgr.activate(this, mMgrListener);
+        m_ir.onCreate(this);
     }
 
     @Override
@@ -309,29 +235,6 @@ public class MainActivity extends Activity implements
     public void onStopTrackingTouch(SeekBar seekBar) {
     }
 
-    private void setupKeyList() {
-
-        List<Key> keyList;
-        if (mDevice != null) {
-            keyList = mDevice.getKeyList();
-        } else {
-            keyList = new ArrayList<Key>();
-        }
-
-        mKeys.clear();
-        mKeyLabels.clear();
-        for (Key key : keyList) {
-
-            String label = key.getUserLabel();
-            if (label == null) {
-                label = "-----";
-            }
-            boolean learnt = key.isLearnt();
-
-            mKeyLabels.add("type: " + key.getType() + ", label: " + label + ", learnt: " + learnt);
-            mKeys.add(key);
-        }
-    }
 
     public void buttonMethodRandomLights(View button) {
         if (m_hue.isConnected()) {
@@ -359,4 +262,5 @@ public class MainActivity extends Activity implements
             Toast.makeText(this, "まだ繋がってません", Toast.LENGTH_SHORT).show();
         }
     }
+
 }

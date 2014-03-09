@@ -18,7 +18,7 @@ public class Ball {
 		if(channel != null){
 			Log.w(TAG, "Channel:" + channel.m_chNumber);
 			if(m_activity != null){
-				m_activity.controlTV(channel.m_chNumber);
+				m_activity.m_ir.controlTV(channel.m_chNumber);
 			}
 		}
 		else{
