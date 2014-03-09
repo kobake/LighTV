@@ -17,6 +17,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -24,6 +25,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnTouchListener;
+import android.widget.Toast;
 import android.graphics.PorterDuff;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -113,7 +115,10 @@ public class SampleSurfaceView implements
 	public boolean onTouch(View v, MotionEvent event) {
 		switch (event.getAction()) {
 		case MotionEvent.ACTION_DOWN:
-			m_balls.addBall(event.getX(), event.getY());
+			//m_balls.addBall(event.getX(), event.getY());
+			// リモコン操作
+			//Toast.makeText(v.getContext(), "りもこん", Toast.LENGTH_SHORT).show();
+			m_balls.pushTouch((int)event.getX(), (int)event.getY());
 			break;
 		default:
 			break;
@@ -163,7 +168,7 @@ public class SampleSurfaceView implements
 			t1 = System.currentTimeMillis();
 
 			// ゲーム処理
-			m_balls.frame();
+			m_balls.frame(m_channelList);
 
 			// 描画処理
 			Canvas canvas = m_holder.lockCanvas();
@@ -230,7 +235,7 @@ class Balls {
 		m_owner = owner;
 		m_values = values;
 		// 10個くらい作る
-		for (int i = 0; i < 6; i++) {
+		for (int i = 0; i < 8; i++) {
 			Ball ball = new Ball(owner);
 			ball.onSeekChanged(values);
 			ball.setRandomColor();
@@ -247,16 +252,28 @@ class Balls {
 		}
 	}
 
+	// ボール追加キュー
 	LinkedBlockingQueue<Ball> m_queue = new LinkedBlockingQueue<Ball>();
+	
+	// 表スレッドから呼ばれる
 	public void addBall(double x, double y){
-		//### 本当はキュー経由で追加しないと危険
+		// キュー経由で追加
 		Ball ball = new Ball(m_owner, x, y);
 		ball.onSeekChanged(m_values);
 		ball.setRandomColor();
 		m_queue.add(ball);
 	}
 	
-	public void frame() {
+	// タッチキュー
+	LinkedBlockingQueue<Point> m_touchQueue = new LinkedBlockingQueue<Point>();
+	
+	// 表スレッドから呼ばれる
+	public void pushTouch(int x, int y){
+		Point p = new Point(x, y);
+		m_touchQueue.add(p);
+	}
+	
+	public void frame(ChannelList channelList) {
 		// キュー処理
 		Ball new_ball = m_queue.peek();
 		if(new_ball != null){
@@ -268,6 +285,43 @@ class Balls {
 			m_balls.add(new_ball);
 			if(m_balls.size() > m_maxCount){
 				m_balls.remove(0); // 0番目を消す
+			}
+		}
+		
+		// キュー処理：タッチ
+		Point p = m_touchQueue.peek();
+		if(p != null){
+			try{
+				m_touchQueue.take();
+			}
+			catch(InterruptedException ex){
+			}
+			// 近くのボールを探す
+			double min_dist2 = 10000;
+			Ball found = null;
+			Channel found_channel = null;
+			for(int i = 0; i < m_balls.size(); i++){
+				Ball ball = m_balls.get(i);
+				// 距離の2乗
+				double dist2 = (ball.m_x - p.x) * (ball.m_x - p.x)
+					+ (ball.m_y - p.y) * (ball.m_y - p.y);
+				// 円内
+				if(dist2 < ball.m_r * ball.m_r){
+					// 円内の中でも差をつけるために、最も短い距離を確保しておく
+					if(dist2 < min_dist2){
+						min_dist2 = dist2;
+						found = ball;
+						synchronized (this) {
+							if(i < channelList.m_list.size()){
+								found_channel = channelList.m_list.get(i);
+							}
+						}
+					}
+				}
+			}
+			// 見つかったボールについて処理
+			if(found != null){
+				found.onTouch(found_channel);
 			}
 		}
 
@@ -306,7 +360,19 @@ class Balls {
 }
 
 class Ball {
-	
+	public static MainActivity m_activity;
+    private static final String TAG = "RemoteActivity";
+	public void onTouch(Channel channel){
+		if(channel != null){
+			Log.w(TAG, "Channel:" + channel.m_chNumber);
+			if(m_activity != null){
+				m_activity.controlTV(channel.m_chNumber);
+			}
+		}
+		else{
+			Log.w(TAG, "No channel");
+		}
+	}
 	public Ball(SampleSurfaceView owner) {
 		this(owner, -1, -1);
 	}

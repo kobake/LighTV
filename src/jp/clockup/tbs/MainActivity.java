@@ -129,7 +129,7 @@ public class MainActivity extends Activity implements
         Log.d("IR contorol", "select channnel " + cannnel);
         mDevice.sendKey(mKeys.get(52 + cannnel));// sonytablet:55-63,
                                                  // xperiatablet:53-61
-        Toast.makeText(this, "select channnel " + cannnel, Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, "select channnel " + cannnel, Toast.LENGTH_SHORT).show();
     }
 
     public void buttonMethodChannelTest(View button) {
@@ -247,6 +247,8 @@ public class MainActivity extends Activity implements
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+    	Ball.m_activity = this;
+    	
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         m_textViewSec = (TextView)findViewById(R.id.textViewSec);
