@@ -89,6 +89,7 @@ public class MainActivity extends Activity implements
     Timer       mTimer    = null;
     Handler     mHandler  = new Handler();
     int         m_counter = 0;
+    long        m_lastTvzin = 0;
     class MyTimerTask extends TimerTask{
         @Override
         public void run() {
@@ -97,8 +98,15 @@ public class MainActivity extends Activity implements
                 public void run() {
                 	m_counter++;
                 	//m_textViewSync.setText("" + m_counter);
+                	// 音声認識のスタートトリガ
                 	if(m_counter == 1){
-                		m_eaw.toggle(); // 最初のスタート
+                		m_eaw.toggle();
+                	}
+                	
+                	//　TVZIN情報の定期取得 (1分おき)
+                	long tvzin_elapsed = System.currentTimeMillis() - m_lastTvzin;
+                	if(tvzin_elapsed >= 60 * 1000){
+                		m_tvzin.request(MainActivity.this);
                 	}
                 }
             });
@@ -110,7 +118,7 @@ public class MainActivity extends Activity implements
             timerTask = new MyTimerTask();
             mTimer = new Timer(true);
             // delayミリ秒あとにperiodミリ秒間隔でタスク実行
-            mTimer.schedule( timerTask, 1000, 1000);
+            mTimer.schedule( timerTask, 3000, 1000);
         }
     }
     private void stopTimer(){
