@@ -51,6 +51,7 @@ public class MainActivity extends Activity implements
         SeekBar.OnSeekBarChangeListener, Tvzin.Listener, EawController.Listener {
 	TextView m_textViewSec = null;
 	TextView m_textViewSync = null;
+	TextView m_textViewRimo = null;
 	
 	// 子モジュール
     HueUtil m_hue = new HueUtil();
@@ -104,6 +105,10 @@ public class MainActivity extends Activity implements
                 		m_eaw.toggle();
                 	}
                 	if(m_counter < 3)return;
+                	
+                	// リモコン選択情報
+                	String s = Ball.m_selected_one.getSelected();
+                	m_textViewRimo.setText(s);
                 	
                 	//　TVZIN情報の定期取得 (1分おき)
                 	long tvzin_elapsed = System.currentTimeMillis() - m_lastTvzin;
@@ -164,6 +169,18 @@ public class MainActivity extends Activity implements
     // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
     public void buttonMethodChannelTest(View button) {
         m_ir.controlTV(6);
+    }
+    public void buttonMethodRimo(View button){
+    	TextView t = (TextView)findViewById(R.id.textViewRimo);
+    	try{
+	    	int n = Integer.parseInt(t.getText().toString().split("\n")[0]);
+	    	if(n > 0){
+	            m_ir.controlTV(n);
+	    	}
+    	}
+    	catch(Exception ex){
+    		Toast.makeText(this, "rimo error: " + ex.toString(), Toast.LENGTH_SHORT).show();
+    	}
     }
     
     // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
@@ -242,10 +259,13 @@ public class MainActivity extends Activity implements
         setContentView(R.layout.activity_main);
         m_textViewSec = (TextView)findViewById(R.id.textViewSec);
         m_textViewSync = (TextView)findViewById(R.id.textViewSync);
+        m_textViewRimo = (TextView)findViewById(R.id.textViewRimo);
 
         // Hue初期化
+        /*
         m_hue.onCreate(this, m_textViewSec);
-
+		*/
+        
         // ロゴ
         ImageView imageView = (ImageView) findViewById(R.id.imageView1);
         imageView.setAlpha(80);

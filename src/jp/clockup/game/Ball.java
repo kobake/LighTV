@@ -12,6 +12,17 @@ import android.util.Log;
 
 
 public class Ball {
+	private static String m_selected = "";
+	public static Selected m_selected_one;
+	public class Selected{
+	    public synchronized String getSelected(){
+	        return m_selected;
+	    }
+	    public synchronized void setSelected(String bar){
+	        m_selected = bar;
+	    }
+	}
+	
 	public static MainActivity m_activity;
     private static final String TAG = "RemoteActivity";
 	public void onTouch(Channel channel){
@@ -20,6 +31,8 @@ public class Ball {
 			if(m_activity != null){
 				m_activity.m_ir.controlTV(channel.m_chNumber);
 			}
+			// アクティビティに情報をを伝えたい
+			Ball.m_selected_one.setSelected(channel.m_chNumber + "\n" + channel.m_chName + "\n" + channel.m_title);
 		}
 		else{
 			Log.w(TAG, "No channel");
@@ -29,6 +42,7 @@ public class Ball {
 		this(owner, -1, -1);
 	}
 	public Ball(SampleSurfaceView owner, double x, double y) {
+		if(m_selected_one == null)m_selected_one = new Selected();
 		Random r = new Random();
 		if(x >= 0 && y >= 0){
 			m_x = x;

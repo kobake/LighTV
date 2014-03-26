@@ -183,9 +183,33 @@
             android:id="@+id/imageView1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
+            android:layout_gravity="bottom|right"
             android:scaleType="centerCrop"
             android:src="@drawable/logo" />
+
+        <LinearLayout
+            android:layout_width="200dp"
+            android:layout_height="match_parent"
+            android:orientation="vertical" >
+
+            <Button
+                android:id="@+id/button6"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:background="#80ff"
+                android:onClick="buttonMethodRimo"
+                android:text="リモコン"
+                android:textSize="26sp" />
+
+            <TextView
+                android:id="@+id/textViewRimo"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#afff"
+                android:padding="8dp"
+                android:textSize="20sp" />
+
+        </LinearLayout>
 
     </FrameLayout>
 

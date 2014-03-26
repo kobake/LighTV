@@ -76,6 +76,7 @@ public class Balls {
 		m_wind = 1;
 	}
 	
+	Ball m_selected = null;
 	public void frame(ChannelList channelList) {
 		// キュー処理
 		Ball new_ball = m_queue.peek();
@@ -125,6 +126,7 @@ public class Balls {
 			// 見つかったボールについて処理
 			if(found != null){
 				found.onTouch(found_channel);
+				m_selected = found;
 			}
 		}
 		
@@ -185,6 +187,16 @@ public class Balls {
 				canvas.drawLine(
 						(int)m_balls.get(i).m_x, (int)m_balls.get(i).m_y,
 						(int)m_balls.get(j).m_x, (int)m_balls.get(j).m_y,
+						paint);
+			}
+		}
+		// 選択ボール
+		for(int i = 0; i < m_balls.size() - 1; i++){
+			if(m_selected == m_balls.get(i)){
+				paint.setStrokeWidth(4);
+				canvas.drawLine(
+						(int)m_selected.m_x, (int)m_selected.m_y,
+						(int)200, (int)80,
 						paint);
 			}
 		}
